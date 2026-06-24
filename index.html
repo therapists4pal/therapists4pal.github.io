@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapists4Palestine Directory</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --primary: #0ea5e9;
+            --primary-light: #e0f2fe;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --alert-bg: #fef2f2;
+            --alert-text: #991b1b;
+            --alert-border: #fecaca;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 40px 20px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 { margin: 0 0 10px 0; color: #0f172a; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 20px; }
+
+        .disclaimer-banner {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--alert-bg);
+            color: var(--alert-text);
+            border: 1px solid var(--alert-border);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Filter Bar Setup */
+        .filter-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            min-width: 180px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        select:focus { outline: 2px solid var(--primary); }
+
+        /* Grid Layout */
+        .directory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Card Styling */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title h2 { margin: 0 0 5px 0; font-size: 1.3rem; color: #0f172a; }
+        .location { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+        
+        .contact-info {
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: 10px;
+            word-break: break-word;
+        }
+
+        /* Data Sections within the card */
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin: 15px 0 8px 0;
+        }
+
+        .text-block { font-size: 0.95rem; margin: 0 0 15px 0; }
+        .motivation-block { font-size: 0.95rem; font-style: italic; color: #475569; background: #f8fafc; padding: 12px; border-left: 3px solid var(--border); border-radius: 4px; }
+
+        /* Badges for lists (Languages, Modalities, etc.) */
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            background-color: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+        }
+
+        .badge.setting { background-color: var(--primary-light); color: #0369a1; border-color: #bae6fd; }
+        .badge.price { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Therapists4Palestine Directory</h1>
+        <div class="subtitle">Find a practitioner aligned with your values.</div>
+        <div class="disclaimer-banner">
+            <strong>Important:</strong> Clients can report on the directory if a therapist is not following T4P's guidelines and values, which could lead to the removal of the therapist's entry.
+        </div>
+    </header>
+
+    <!-- Interactive Filters -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label>Province</label>
+            <select id="filter-province">
+                <option value="All">All Locations</option>
+                <option value="Alberta">Alberta</option>
+                <option value="British Columbia">British Columbia</option>
+                <option value="Manitoba">Manitoba</option>
+                <option value="New Brunswick">New Brunswick</option>
+                <option value="Newfoundland and Labrador">Newfoundland & Labrador</option>
+                <option value="Nova Scotia">Nova Scotia</option>
+                <option value="Ontario">Ontario</option>
+                <option value="Prince Edward Island">Prince Edward Island</option>
+                <option value="Quebec">Quebec</option>
+                <option value="Saskatchewan">Saskatchewan</option>
+                <option value="Northwest Territories">Northwest Territories</option>
+                <option value="Nunavut">Nunavut</option>
+                <option value="Yukon">Yukon</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Specialization</label>
+            <select id="filter-specialization">
+                <option value="All">All Presentations</option>
+                <option value="ADHD">ADHD</option>
+                <option value="Anxiety">Anxiety</option>
+                <option value="Autism">Autism</option>
+                <option value="Depression">Depression</option>
+                <option value="OCD">OCD</option>
+                <option value="PTSD">PTSD</option>
+                <option value="Trauma">Trauma</option>
+                <option value="Addictions">Addictions</option>
+                <option value="Personality Disorders">Personality Disorders</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Setting</label>
+            <select id="filter-setting">
+                <option value="All">Any Setting</option>
+                <option value="In-person">In-person</option>
+                <option value="Online">Online</option>
+                <option value="Mix">Mix / Hybrid</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Sliding Scale</label>
+            <select id="filter-sliding">
+                <option value="All">Any Pricing</option>
+                <option value="Yes">Offers Sliding Scale</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="directory-grid" id="directory">
+        <div class="no-results" id="loading-text">Loading directory data...</div>
+    </div>
+
+    <script>
+        // Replace with your actual live published Google Sheets CSV URL
+        // WITH your new Cloudflare Worker link:
+        const sheetUrl = 'https://t4p-directory-api.marwanjalaleddine.workers.dev/';
+        let allData = [];
+
+        // Helper function to turn comma-separated strings into HTML badges
+        function createBadges(dataString, badgeClass = '') {
+            if (!dataString) return '';
+            const items = dataString.split(',').map(item => item.trim()).filter(item => item !== '');
+            return items.map(item => `<span class="badge ${badgeClass}">${item}</span>`).join('');
+        }
+
+        // Main function to draw the cards
+        function renderCards(dataToRender) {
+            const container = document.getElementById('directory');
+            container.innerHTML = ''; // Clear current cards
+
+            if (dataToRender.length === 0) {
+                container.innerHTML = '<div class="no-results">No professionals match your current filters.</div>';
+                return;
+            }
+
+            dataToRender.forEach(person => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Helper to format contact safely if it's a link
+                let contactHTML = person.Contact || 'N/A';
+                if (contactHTML.startsWith('http')) {
+                    contactHTML = `<a href="${contactHTML}" target="_blank" style="color: var(--primary); text-decoration: none;">Booking Link ↗</a>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h2>${person.Name || 'Anonymous Practitioner'}</h2>
+                            <div class="location">📍 ${person.Province || 'Location Not Specified'}</div>
+                            <div class="contact-info">Reach out: ${contactHTML}</div>
+                        </div>
+                    </div>
+
+                    <div class="badge-container">
+                        ${createBadges(person.Setting, 'setting')}
+                        ${person.SlidingScale && person.SlidingScale.toLowerCase().includes('yes') ? '<span class="badge price">Sliding Scale Available</span>' : ''}
+                        ${person.ProBono && person.ProBono.toLowerCase().includes('yes') ? '<span class="badge price">Pro-bono Options</span>' : ''}
+                    </div>
+
+                    <div class="section-title">Works With</div>
+                    <div class="text-block">${[person.ClientAge, person.ClientType].filter(Boolean).join(' — ')}</div>
+
+                    ${person.Identity ? `
+                    <div class="section-title">Practitioner Identity</div>
+                    <div class="text-block">${person.Identity}</div>
+                    ` : ''}
+
+                    <div class="section-title">Presentations & Specializations</div>
+                    <div class="badge-container">
+                        ${createBadges(person.Specialization)}
+                    </div>
+
+                    <div class="section-title">Approach & Modality</div>
+                    <div class="badge-container">
+                        ${createBadges(person.Modality)}
+                    </div>
+
+                    <div class="section-title">Languages</div>
+                    <div class="badge-container">
+                        ${createBadges(person.Languages)}
+                    </div>
+
+                    <div class="section-title">Rates & Availability</div>
+                    <div class="text-block">
+                        <strong>Hourly Rate:</strong> ${person.Rate || 'Contact for rates'}<br>
+                        <strong>Sliding Scale Rate:</strong> ${person.SlidingRate || 'N/A'}<br>
+                        ${person.Availability ? `<strong>Availability:</strong> ${person.Availability}` : ''}
+                    </div>
+
+                    ${person.Motivation ? `
+                    <div class="section-title">Motivation to join T4P</div>
+                    <div class="motivation-block">"${person.Motivation}"</div>
+                    ` : ''}
+
+                    ${person.ExtraInfo ? `
+                    <div class="section-title">Additional Info</div>
+                    <div class="text-block" style="font-size: 0.85rem; color: #64748b;">${person.ExtraInfo}</div>
+                    ` : ''}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Function to filter the data based on dropdowns
+        function applyFilters() {
+            const provVal = document.getElementById('filter-province').value;
+            const specVal = document.getElementById('filter-specialization').value.toLowerCase();
+            const setVal = document.getElementById('filter-setting').value.toLowerCase();
+            const slideVal = document.getElementById('filter-sliding').value;
+
+            const filteredData = allData.filter(person => {
+                let matchProv = true;
+                if (provVal !== 'All') {
+                    matchProv = person.Province && person.Province.includes(provVal);
+                }
+
+                let matchSpec = true;
+                if (specVal !== 'all') {
+                    matchSpec = person.Specialization && person.Specialization.toLowerCase().includes(specVal);
+                }
+
+                let matchSet = true;
+                if (setVal !== 'all') {
+                    matchSet = person.Setting && person.Setting.toLowerCase().includes(setVal);
+                }
+
+                let matchSlide = true;
+                if (slideVal === 'Yes') {
+                    matchSlide = person.SlidingScale && person.SlidingScale.toLowerCase().includes('yes');
+                }
+
+                return matchProv && matchSpec && matchSet && matchSlide;
+            });
+
+            renderCards(filteredData);
+        }
+
+        // Load the data
+        Papa.parse(sheetUrl, {
+            download: true,
+            header: true,
+            // Map the long Google Forms headers to shorter object properties automatically
+            transformHeader: function(h) {
+                const header = h.toLowerCase();
+                if (header.includes("motivation")) return "Motivation";
+                if (header.includes("consent")) return "Consent";
+                if (header.includes("province")) return "Province";
+                if (header.includes("name of therapist")) return "Name";
+                if (header.includes("share your name")) return "Share";
+                if (header.includes("contact information")) return "Contact";
+                if (header.includes("what kind of clients")) return "ClientAge";
+                if (header.includes("do you work with:")) return "ClientType";
+                if (header.includes("presentations")) return "Specialization";
+                if (header.includes("languages")) return "Languages";
+                if (header.includes("approach/modality")) return "Modality";
+                if (header.includes("aspects of your identity")) return "Identity";
+                if (header.includes("offer a sliding scale")) return "SlidingScale";
+                if (header.includes("hourly rate")) return "Rate";
+                if (header.includes("sliding scale rate")) return "SlidingRate";
+                if (header.includes("probono")) return "ProBono";
+                if (header.includes("do you see clients")) return "Setting";
+                if (header.includes("specific information? e.g., days")) return "Availability";
+                if (header.includes("any other information")) return "ExtraInfo";
+                return h.trim();
+            },
+            complete: function(results) {
+                // Filter out anyone who did not answer "yes" to sharing their name
+                allData = results.data.filter(person => {
+                    const shareConsent = person.Share ? person.Share.toString().toLowerCase().trim() : '';
+                    return shareConsent.includes('yes') && person.Name; 
+                });
+
+                // Draw the initial cards
+                renderCards(allData);
+
+                // Attach event listeners to the dropdowns
+                document.getElementById('filter-province').addEventListener('change', applyFilters);
+                document.getElementById('filter-specialization').addEventListener('change', applyFilters);
+                document.getElementById('filter-setting').addEventListener('change', applyFilters);
+                document.getElementById('filter-sliding').addEventListener('change', applyFilters);
+            },
+            error: function(error) {
+                document.getElementById('loading-text').innerText = "Error loading data. Please check your Google Sheet connection.";
+                console.error("Error parsing CSV:", error);
+            }
+        });
+    </script>
+</body>
+</html>
