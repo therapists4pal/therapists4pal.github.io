@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#8b1a1a">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <title>Therapists4Palestine Directory</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js">
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --text: #1a1a1a;
+            --muted: #4a4a4a;
+            --primary: #8b1a1a;
+            --primary-dark: #6e1414;
+            --gold: #b49450;
+            --gold-light: #d4bc7e;
+            --border: #e2e0da;
+            --border-strong: #cbc7bc;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
+            --radius: 3px;
+            --transition: 200ms ease;
+            --header-height: 85px;
+            --container-width: 1140px;
+            --footer-bg: #2b2b2b;
+            --footer-text: #cccccc;
+            --footer-heading: #ffffff;
+            --alert-bg: rgba(139, 26, 26, 0.06);
+            --alert-text: #8b1a1a;
+            --alert-border: rgba(139, 26, 26, 0.18);
+            --agreement-bg: rgba(180, 148, 80, 0.06);
+            --agreement-text: #5a4a2e;
+            --agreement-border: rgba(180, 148, 80, 0.22);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+            padding-top: var(--header-height);
+        }
+
+        /* ── Modal Overlay (shared styles) ── */
+        .agreement-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .agreement-modal {
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.25);
+            max-width: 620px;
+            width: 100%;
+            padding: 36px 32px 28px;
+            position: relative;
+            border-top: 4px solid var(--gold);
+            animation: slideUp 0.35s ease;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .agreement-modal h2 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            margin: 0 0 20px;
+            color: var(--text);
+        }
+
+        .agreement-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .agreement-text p {
+            margin: 0 0 14px;
+        }
+
+        .agreement-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 4px 8px;
+            line-height: 1;
+            transition: color var(--transition);
+        }
+
+        .agreement-close-btn:hover {
+            color: var(--primary);
+        }
+
+        .agreement-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .agreement-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .agreement-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-agree {
+            background: var(--primary);
+            color: #fff;
+            border: 1px solid var(--primary-dark);
+            padding: 12px 26px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background var(--transition), box-shadow var(--transition);
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-agree.enabled {
+            opacity: 1;
+            pointer-events: auto;
+            box-shadow: 0 4px 12px rgba(139, 26, 26, 0.2);
+        }
+
+        .btn-agree.enabled:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 8px 20px rgba(139, 26, 26, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ── Header ── */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            transition: box-shadow var(--transition);
+        }
+
+        .header-container {
+            max-width: var(--container-width);
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .site-branding {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            flex-shrink: 0;
+        }
+
+        .site-logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gold-light);
+            background: white;
+            padding: 2px;
+            flex: none;
+        }
+
+        .site-title-group {
+            min-width: 0;
+        }
+
+        .site-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            line-height: 1.2;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .site-tagline {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin: 2px 0 0;
+            white-space: nowrap;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        .main-navigation {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-left: auto;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            position: relative;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text);
+            transition: color var(--transition);
+            padding: 8px 0;
+            display: inline-block;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        .header-cta {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 16px;
+            background: var(--primary);
+            color: #fff !important;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background var(--transition), box-shadow var(--transition);
+            border: 1px solid var(--primary-dark);
+            white-space: nowrap;
+        }
+
+        .header-cta:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 14px rgba(139, 26, 26, 0.3);
+            color: #fff !important;
+        }
+
+        .header-cta.join-us {
+            background: var(--gold);
+            border-color: #8d742f;
+        }
+
+        .header-cta.join-us:hover {
+            background: #9f8338;
+            box-shadow: 0 4px 14px rgba(180, 148, 80, 0.28);
+        }
+
+        .search-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: var(--text);
+            transition: color var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-toggle:hover {
+            color: var(--primary);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--text);
+            margin: 6px 0;
+            transition: all 0.3s ease;
+        }
+
+        #mobile-menu-checkbox {
+            display: none;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-bar {
+            background: #f8f7f4;
+            border-bottom: 1px solid var(--border);
+            padding: 10px 0;
+        }
+
+        .breadcrumb-container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .breadcrumb-container a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .breadcrumb-container a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Hero ── */
+        .page-hero {
+            background: linear-gradient(135deg, rgba(180, 148, 80, 0.04) 0%, rgba(255, 255, 255, 0) 50%);
+            border-bottom: 1px solid var(--border);
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .hero-inner {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border: 1px solid var(--gold-light);
+            padding: 6px 18px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .page-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin: 0 0 16px;
+            color: var(--text);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--muted);
+            max-width: 680px;
+            margin: 0 auto 24px;
+            line-height: 1.7;
+        }
+
+        .hero-points {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .hero-point {
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Alert banner for client disclaimer */
+        .disclaimer-banner {
+            max-width: var(--container-width);
+            margin: 0 auto 0;
+            background-color: var(--alert-bg);
+            color: var(--alert-text);
+            border: 1px solid var(--alert-border);
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            font-size: 0.93rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .disclaimer-banner::before {
+            content: '⚠️';
+            font-size: 1.2rem;
+        }
+
+        /* Therapist agreement notice - now with nowrap to keep button inline */
+        .therapist-agreement-notice {
+            background-color: var(--agreement-bg);
+            color: var(--agreement-text);
+            border: 1px solid var(--agreement-border);
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;            /* button stays on same line */
+            overflow: hidden;
+        }
+
+        .therapist-agreement-notice::before {
+            content: '✓';
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .therapist-agreement-notice span {
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .view-agreement-btn {
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: underline;
+            cursor: pointer;
+            white-space: nowrap;
+            padding: 0;
+            font-family: inherit;
+            transition: color var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .view-agreement-btn:hover {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .view-agreement-btn::after {
+            content: '↗';
+            font-size: 0.8rem;
+        }
+
+        /* ── Filter Bar ── */
+        .filter-section {
+            background: #ffffff;
+            padding: 18px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: var(--header-height);
+            z-index: 99;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        select {
+            padding: 10px 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-strong);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            min-width: 180px;
+            background-color: #fff;
+            cursor: pointer;
+            color: var(--text);
+            transition: border-color var(--transition);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 26, 26, 0.1);
+        }
+
+        /* ── Directory Grid ── */
+        .directory-container {
+            max-width: var(--container-width);
+            margin: 40px auto 60px;
+            padding: 0 24px;
+        }
+
+        .directory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title h2 {
+            margin: 0 0 6px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .location {
+            font-size: 0.9rem;
+            color: var(--muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .contact-info {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 8px;
+            word-break: break-word;
+        }
+
+        .contact-info a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 18px 0 8px;
+        }
+
+        .text-block {
+            font-size: 0.93rem;
+            margin: 0 0 12px;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .motivation-block {
+            font-size: 0.93rem;
+            font-style: italic;
+            color: var(--text);
+            background: rgba(180, 148, 80, 0.06);
+            padding: 12px 14px;
+            border-left: 3px solid var(--gold);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            margin-top: 8px;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            background-color: rgba(139, 26, 26, 0.06);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(139, 26, 26, 0.15);
+            letter-spacing: 0.02em;
+        }
+
+        .badge.setting {
+            background-color: rgba(139, 26, 26, 0.1);
+            color: var(--primary-dark);
+            border-color: rgba(139, 26, 26, 0.2);
+        }
+
+        .badge.price {
+            background-color: rgba(180, 148, 80, 0.1);
+            color: #7a6235;
+            border-color: rgba(180, 148, 80, 0.25);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 52px 28px;
+            font-size: 1.1rem;
+            color: var(--muted);
+            background: #fff;
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius);
+        }
+
+        /* ── Footer ── */
+        .site-footer {
+            background: var(--footer-bg);
+            color: var(--footer-text);
+            padding: 60px 24px 30px;
+            margin-top: 40px;
+            border-top: 4px solid var(--gold);
+        }
+
+        .footer-widgets {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .footer-widget h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--footer-heading);
+            margin: 0 0 16px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 8px;
+        }
+
+        .footer-widget ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-widget ul li {
+            margin-bottom: 8px;
+        }
+
+        .footer-widget ul li a {
+            color: var(--footer-text);
+            text-decoration: none;
+            transition: color var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .footer-widget ul li a:hover {
+            color: var(--gold-light);
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .footer-bottom a {
+            color: var(--gold-light);
+            text-decoration: none;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .header-container {
+                flex-wrap: nowrap;
+            }
+
+            .main-navigation {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 280px;
+                height: 100vh;
+                background: #fff;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+                padding: 80px 28px 30px;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 999;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            #mobile-menu-checkbox:checked~.main-navigation {
+                transform: translateX(0);
+            }
+
+            .nav-menu {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .nav-menu a {
+                font-size: 1rem;
+            }
+
+            .header-cta {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .search-toggle {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .footer-widgets {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+
+            .page-hero {
+                padding: 40px 16px;
+            }
+
+            .directory-container {
+                padding: 0 16px;
+            }
+
+            .directory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            select {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .disclaimer-banner,
+            .therapist-agreement-notice {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+                padding: 14px 18px;
+            }
+
+            /* On very small screens, allow button to wrap only if needed */
+            .therapist-agreement-notice {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Client Agreement Modal (must agree to access directory) -->
+    <div id="clientAgreementOverlay" class="agreement-overlay" style="display: none;">
+        <div class="agreement-modal">
+            <h2>Client Agreement</h2>
+            <div class="agreement-text">
+                <p><strong>I agree that Therapists 4 Palestine (T4P) is not responsible for vetting credibility, competency, or safety of therapists listed, and that the presence of a therapist on this directory does not mean an endorsement of this therapist by T4P.</strong></p>
+                <p><strong>I agree that it's my responsibility to vet any potential therapists I find on this directory</strong> (e.g., through their licensing bodies, professional associations, web search, word of mouth, and interviewing during an initial consultation call).</p>
+                <p>I understand that a therapist's appearance on this directory reflects that this therapist has endorsed T4P's Mission & Values.</p>
+                <p>I understand that this directory may list both practitioners who are licensed by a Canadian licensing body as well as practitioners who are not licensed by any Canadian licensing body.</p>
+            </div>
+            <label class="agreement-checkbox">
+                <input type="checkbox" id="agreementCheckbox">
+                <span>I have read and agree to the Client Agreement</span>
+            </label>
+            <div class="agreement-actions">
+                <button id="btnAgree" class="btn-agree" disabled>I Agree</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Therapist Agreement Modal (viewable by anyone) -->
+    <div id="therapistAgreementOverlay" class="agreement-overlay" style="display: none;">
+        <div class="agreement-modal">
+            <button class="agreement-close-btn" id="closeTherapistAgreement">✕</button>
+            <h2>Therapist Agreement</h2>
+            <div class="agreement-text">
+                <p>I embrace and commit to Therapists 4 Palestine's Mission & Values as given on this website.</p>
+                <p>I commit to abide by any laws governing the practice of psychotherapy or counselling in the province(s) where I practice (e.g., the Psychotherapist Act, 2007 in Ontario).</p>
+                <p>I commit to abide by the professional standards issued by any licensing body with which I am registered (e.g., in Ontario the CRPO, CNO, OCSWSSW, COTO, CPSO, CPBAO).</p>
+                <p>I commit to uphold my professional Code of Ethics.</p>
+                <p>I understand that T4P is not a source of professional accountability to me, and that it is my responsibility to engage in ongoing professional development (e.g., consultation, supervision, training) in order to cultivate a safe and effective use of self with clients who may seek my services.</p>
+                <p>I understand that if any information comes to T4P's attention that raises concerns about my credibility or my ability to practice safely, T4P reserves the right and discretion to remove me from this directory, and, if necessary, to share this information with my licensing and/or professional body.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WordPress-style sticky header -->
+    <header class="site-header">
+        <div class="header-container">
+            <div class="site-branding">
+                <img src="icon.png" alt="Therapists 4 Palestine logo" class="site-logo" loading="eager">
+                <div class="site-title-group">
+                    <div class="site-title">Therapists 4 Palestine</div>
+                    <!-- <div class="site-tagline">Who We Are</div> -->
+                </div>
+            </div>
+
+            <input type="checkbox" id="mobile-menu-checkbox">
+            <label for="mobile-menu-checkbox" class="menu-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </label>
+
+            <nav class="main-navigation">
+                <ul class="nav-menu">
+                    <li><a href="index.html">Who We Are</a></li>
+                    <li><a href="directory.html" class="active">Directory</a></li>
+                    <li><a href="events.html">Events</a></li>
+                </ul>
+                <a href="https://forms.gle/PUT-YOUR-GOOGLE-FORM-LINK-HERE" class="header-cta join-us" target="_blank" rel="noreferrer noopener">Join us</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar">
+        <div class="breadcrumb-container">
+            <a href="index.html">Home</a> / <strong>Directory</strong>
+        </div>
+    </div>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="hero-inner">
+            <span class="hero-badge">Therapists4Palestine Directory</span>
+            <h1>Find a practitioner aligned with your values.</h1>
+            <p class="hero-description">A curated directory of therapists across Canada, built to help clients discover thoughtful, values-aligned care with clear filters and a cleaner browsing experience.</p>
+            <div class="hero-points">
+                <span class="hero-point">Values-aligned referrals</span>
+                <span class="hero-point">Sliding scale and pro-bono options</span>
+                <span class="hero-point">Online and in-person support</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Disclaimer & Therapist Agreement notice -->
+    <div style="max-width: var(--container-width); margin: 24px auto 0; padding: 0 24px;">
+        <div class="disclaimer-banner">
+            <strong>Important:</strong> All therapists listed have agreed to the T4P Therapist Agreement, including commitment to the Mission & Values, professional ethics, and adherence to legal and regulatory standards in their province.</span>
+            <button id="showTherapistAgreementBtn" class="view-agreement-btn">View Agreement</button>
+        </div>
+        <!-- <div class="therapist-agreement-notice" style="margin-top: 12px;">
+            <span>
+        </div> -->
+    </div>
+
+    <!-- Interactive Filters (sticky) -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label>Province</label>
+            <select id="filter-province">
+                <option value="All">All Locations</option>
+                <option value="Alberta">Alberta</option>
+                <option value="British Columbia">British Columbia</option>
+                <option value="Manitoba">Manitoba</option>
+                <option value="New Brunswick">New Brunswick</option>
+                <option value="Newfoundland and Labrador">Newfoundland & Labrador</option>
+                <option value="Nova Scotia">Nova Scotia</option>
+                <option value="Ontario">Ontario</option>
+                <option value="Prince Edward Island">Prince Edward Island</option>
+                <option value="Quebec">Quebec</option>
+                <option value="Saskatchewan">Saskatchewan</option>
+                <option value="Northwest Territories">Northwest Territories</option>
+                <option value="Nunavut">Nunavut</option>
+                <option value="Yukon">Yukon</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Specialization</label>
+            <select id="filter-specialization">
+                <option value="All">All Presentations</option>
+                <option value="ADHD">ADHD</option>
+                <option value="Anxiety">Anxiety</option>
+                <option value="Autism">Autism</option>
+                <option value="Depression">Depression</option>
+                <option value="OCD">OCD</option>
+                <option value="PTSD">PTSD</option>
+                <option value="Trauma">Trauma</option>
+                <option value="Addictions">Addictions</option>
+                <option value="Personality Disorders">Personality Disorders</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Setting</label>
+            <select id="filter-setting">
+                <option value="All">Any Setting</option>
+                <option value="In-person">In-person</option>
+                <option value="Online">Online</option>
+                <option value="Mix">Mix / Hybrid</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Sliding Scale</label>
+            <select id="filter-sliding">
+                <option value="All">Any Pricing</option>
+                <option value="Yes">Offers Sliding Scale</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Directory Grid -->
+    <div class="directory-container">
+        <div class="directory-grid" id="directory">
+            <div class="no-results" id="loading-text">Loading directory data...</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-widgets">
+            <div class="footer-widget">
+                <h4>Contact Us</h4>
+                <ul>
+                    <li><a href="mailto:therapists4palestine@proton.me">therapists4palestine@proton.me</a></li>
+                </ul>
+                <p style="margin-top:16px;font-size:0.9rem;">Use the Join us button in the menu if you are a therapist interested in getting involved.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Therapists 4 Palestine. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ── Client Agreement logic ──
+        (function() {
+            const overlay = document.getElementById('clientAgreementOverlay');
+            const checkbox = document.getElementById('agreementCheckbox');
+            const agreeBtn = document.getElementById('btnAgree');
+
+            if (localStorage.getItem('t4p_agreed') === 'true') {
+                overlay.style.display = 'none';
+            } else {
+                overlay.style.display = 'flex';
+            }
+
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    agreeBtn.disabled = false;
+                    agreeBtn.classList.add('enabled');
+                } else {
+                    agreeBtn.disabled = true;
+                    agreeBtn.classList.remove('enabled');
+                }
+            });
+
+            agreeBtn.addEventListener('click', function() {
+                if (!checkbox.checked) return;
+                localStorage.setItem('t4p_agreed', 'true');
+                overlay.style.display = 'none';
+            });
+        })();
+
+        // ── Therapist Agreement modal logic ──
+        (function() {
+            const therapistOverlay = document.getElementById('therapistAgreementOverlay');
+            const showBtn = document.getElementById('showTherapistAgreementBtn');
+            const closeBtn = document.getElementById('closeTherapistAgreement');
+
+            showBtn.addEventListener('click', function() {
+                therapistOverlay.style.display = 'flex';
+            });
+
+            closeBtn.addEventListener('click', function() {
+                therapistOverlay.style.display = 'none';
+            });
+
+            therapistOverlay.addEventListener('click', function(e) {
+                if (e.target === therapistOverlay) {
+                    therapistOverlay.style.display = 'none';
+                }
+            });
+        })();
+
+        // ── Directory data loading ──
+        const sheetUrl = 'https://t4p-directory-api.marwanjalaleddine.workers.dev/';
+        let allData = [];
+
+        function createBadges(dataString, badgeClass = '') {
+            if (!dataString) return '';
+            const items = dataString.split(',').map(item => item.trim()).filter(item => item !== '');
+            return items.map(item => `<span class="badge ${badgeClass}">${item}</span>`).join('');
+        }
+
+        function renderCards(dataToRender) {
+            const container = document.getElementById('directory');
+            container.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                container.innerHTML = '<div class="no-results">No professionals match your current filters.</div>';
+                return;
+            }
+
+            dataToRender.forEach(person => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                let contactHTML = person.Contact || 'N/A';
+                if (contactHTML.startsWith('http')) {
+                    contactHTML = `<a href="${contactHTML}" target="_blank" rel="noreferrer">Booking Link ↗</a>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h2>${person.Name || 'Anonymous Practitioner'}</h2>
+                            <div class="location">📍 ${person.Province || 'Location Not Specified'}</div>
+                            <div class="contact-info">Reach out: ${contactHTML}</div>
+                        </div>
+                    </div>
+
+                    <div class="badge-container">
+                        ${createBadges(person.Setting, 'setting')}
+                        ${person.SlidingScale && person.SlidingScale.toLowerCase().includes('yes') ? '<span class="badge price">Sliding Scale Available</span>' : ''}
+                        ${person.ProBono && person.ProBono.toLowerCase().includes('yes') ? '<span class="badge price">Pro-bono Options</span>' : ''}
+                    </div>
+
+                    <div class="section-title">Works With</div>
+                    <div class="text-block">${[person.ClientAge, person.ClientType].filter(Boolean).join(' — ')}</div>
+
+                    ${person.Identity ? `
+                    <div class="section-title">Practitioner Identity</div>
+                    <div class="text-block">${person.Identity}</div>
+                    ` : ''}
+
+                    <div class="section-title">Presentations & Specializations</div>
+                    <div class="badge-container">
+                        ${createBadges(person.Specialization)}
+                    </div>
+
+                    <div class="section-title">Approach & Modality</div>
+                    <div class="badge-container">
+                        ${createBadges(person.Modality)}
+                    </div>
+
+                    <div class="section-title">Languages</div>
+                    <div class="badge-container">
+                        ${createBadges(person.Languages)}
+                    </div>
+
+                    <div class="section-title">Rates & Availability</div>
+                    <div class="text-block">
+                        <strong>Hourly Rate:</strong> ${person.Rate || 'Contact for rates'}<br>
+                        <strong>Sliding Scale Rate:</strong> ${person.SlidingRate || 'N/A'}<br>
+                        ${person.Availability ? `<strong>Availability:</strong> ${person.Availability}` : ''}
+                    </div>
+
+                    ${person.Motivation ? `
+                    <div class="section-title">Motivation to join T4P</div>
+                    <div class="motivation-block">"${person.Motivation}"</div>
+                    ` : ''}
+
+                    ${person.ExtraInfo ? `
+                    <div class="section-title">Additional Info</div>
+                    <div class="text-block" style="font-size: 0.85rem; color: #64748b;">${person.ExtraInfo}</div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function applyFilters() {
+            const provVal = document.getElementById('filter-province').value;
+            const specVal = document.getElementById('filter-specialization').value.toLowerCase();
+            const setVal = document.getElementById('filter-setting').value.toLowerCase();
+            const slideVal = document.getElementById('filter-sliding').value;
+
+            const filteredData = allData.filter(person => {
+                let matchProv = provVal === 'All' || (person.Province && person.Province.includes(provVal));
+                let matchSpec = specVal === 'all' || (person.Specialization && person.Specialization.toLowerCase().includes(specVal));
+                let matchSet = setVal === 'all' || (person.Setting && person.Setting.toLowerCase().includes(setVal));
+                let matchSlide = slideVal !== 'Yes' || (person.SlidingScale && person.SlidingScale.toLowerCase().includes('yes'));
+                return matchProv && matchSpec && matchSet && matchSlide;
+            });
+
+            renderCards(filteredData);
+        }
+
+        Papa.parse(sheetUrl, {
+            download: true,
+            header: true,
+            transformHeader: function(h) {
+                const header = h.toLowerCase();
+                if (header.includes("motivation")) return "Motivation";
+                if (header.includes("consent")) return "Consent";
+                if (header.includes("province")) return "Province";
+                if (header.includes("name of therapist")) return "Name";
+                if (header.includes("share your name")) return "Share";
+                if (header.includes("contact information")) return "Contact";
+                if (header.includes("what kind of clients")) return "ClientAge";
+                if (header.includes("do you work with:")) return "ClientType";
+                if (header.includes("presentations")) return "Specialization";
+                if (header.includes("languages")) return "Languages";
+                if (header.includes("approach/modality")) return "Modality";
+                if (header.includes("aspects of your identity")) return "Identity";
+                if (header.includes("offer a sliding scale")) return "SlidingScale";
+                if (header.includes("hourly rate")) return "Rate";
+                if (header.includes("sliding scale rate")) return "SlidingRate";
+                if (header.includes("probono")) return "ProBono";
+                if (header.includes("do you see clients")) return "Setting";
+                if (header.includes("specific information? e.g., days")) return "Availability";
+                if (header.includes("any other information")) return "ExtraInfo";
+                return h.trim();
+            },
+            complete: function(results) {
+                allData = results.data.filter(person => {
+                    const shareConsent = person.Share ? person.Share.toString().toLowerCase().trim() : '';
+                    return shareConsent.includes('yes') && person.Name;
+                });
+                renderCards(allData);
+                document.getElementById('filter-province').addEventListener('change', applyFilters);
+                document.getElementById('filter-specialization').addEventListener('change', applyFilters);
+                document.getElementById('filter-setting').addEventListener('change', applyFilters);
+                document.getElementById('filter-sliding').addEventListener('change', applyFilters);
+            },
+            error: function(error) {
+                document.getElementById('loading-text').innerText = "Error loading data. Please check your Google Sheet connection.";
+                console.error("Error parsing CSV:", error);
+            }
+        });
+    </script>
+</body>
+</html>

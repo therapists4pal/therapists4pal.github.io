@@ -6,7 +6,9 @@
     <meta name="theme-color" content="#8b1a1a">
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
-    <title>Therapists 4 Palestine | Who We Are</title>
+    <title>Therapists 4 Palestine | Events</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js">
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -51,7 +53,7 @@
             padding-top: var(--header-height);
         }
 
-        /* ── WordPress-style Header (sticky) ── */
+        /* ── Header (WordPress style) ── */
         .site-header {
             position: fixed;
             top: 0;
@@ -123,7 +125,6 @@
             letter-spacing: 0.02em;
         }
 
-        /* Navigation */
         .main-navigation {
             display: flex;
             align-items: center;
@@ -206,7 +207,6 @@
             box-shadow: 0 4px 14px rgba(180, 148, 80, 0.28);
         }
 
-        /* Search icon placeholder */
         .search-toggle {
             background: none;
             border: none;
@@ -222,7 +222,6 @@
             color: var(--primary);
         }
 
-        /* Hamburger menu (mobile) */
         .menu-toggle {
             display: none;
             background: none;
@@ -241,12 +240,11 @@
             transition: all 0.3s ease;
         }
 
-        /* Mobile navigation hidden by default, shown via checkbox */
         #mobile-menu-checkbox {
             display: none;
         }
 
-        /* ── Breadcrumb ────────────────────── */
+        /* Breadcrumb */
         .breadcrumb-bar {
             background: #f8f7f4;
             border-bottom: 1px solid var(--border);
@@ -271,18 +269,17 @@
             text-decoration: underline;
         }
 
-        /* ── Hero Section (WordPress block style) ── */
-        .hero-section {
-            background: linear-gradient(135deg, rgba(180, 148, 80, 0.04) 0%, rgba(255, 255, 255, 0) 50%),
-                repeating-linear-gradient(45deg, rgba(180, 148, 80, 0.04) 0px, rgba(180, 148, 80, 0.04) 2px, transparent 2px, transparent 8px);
-            padding: 60px 24px;
+        /* ── Hero section for speaker series ── */
+        .page-hero {
+            background: linear-gradient(135deg, rgba(180, 148, 80, 0.04) 0%, rgba(255, 255, 255, 0) 50%);
             border-bottom: 1px solid var(--border);
+            padding: 56px 24px;
+            text-align: center;
         }
 
-        .hero-container {
+        .hero-inner {
             max-width: 860px;
             margin: 0 auto;
-            text-align: center;
         }
 
         .hero-badge {
@@ -299,9 +296,9 @@
             background: rgba(255, 255, 255, 0.8);
         }
 
-        .hero-title {
+        .page-hero h1 {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.8rem, 6vw, 4.2rem);
+            font-size: clamp(2.4rem, 5vw, 3.5rem);
             font-weight: 900;
             line-height: 1.1;
             letter-spacing: -0.03em;
@@ -309,260 +306,124 @@
             color: var(--text);
         }
 
-        .hero-title .highlight {
-            color: var(--primary);
-        }
-
         .hero-description {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: var(--muted);
-            max-width: 680px;
-            margin: 0 auto 32px;
-            line-height: 1.7;
-        }
-
-        .hero-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 14px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 14px 28px;
-            border-radius: var(--radius);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            transition: all var(--transition);
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary-dark);
-            box-shadow: 0 4px 12px rgba(139, 26, 26, 0.2);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            box-shadow: 0 8px 20px rgba(139, 26, 26, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--text);
-            border: 1px solid var(--border-strong);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        /* ── Main Content (WordPress page blocks) ── */
-        .page-content {
-            max-width: var(--container-width);
+            max-width: 780px;
             margin: 0 auto;
-            padding: 60px 24px;
-            display: grid;
-            gap: 40px;
-        }
-
-        .block-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
-        }
-
-        @media (max-width: 768px) {
-            .block-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .wp-block-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            padding: 36px;
-            transition: box-shadow var(--transition), border-color var(--transition);
-            border-radius: var(--radius);
-        }
-
-        .wp-block-card:hover {
-            box-shadow: var(--shadow-md);
-            border-color: var(--border-strong);
-        }
-
-        .block-title {
-            font-family: 'Playfair Display', serif;
-            font-weight: 800;
-            font-size: 1.6rem;
-            letter-spacing: -0.02em;
-            margin: 0 0 16px;
-            color: var(--text);
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-            position: relative;
-        }
-
-        .block-title::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: var(--gold);
-        }
-
-        .wp-block-card p {
-            color: var(--muted);
             line-height: 1.7;
+            text-align: left;
+            font-weight: 400;
+        }
+
+        .hero-description p {
             margin: 0 0 16px;
         }
 
-        .wp-block-card p:last-child {
+        .hero-description p:last-child {
             margin-bottom: 0;
         }
 
-        .value-list,
-        .mandate-list {
-            list-style: none;
-            margin: 20px 0 0;
-            padding: 0;
-            display: grid;
-            gap: 12px;
+        /* ── Events container ── */
+        .events-section {
+            max-width: var(--container-width);
+            margin: 48px auto 60px;
+            padding: 0 24px;
         }
 
-        .value-list li,
-        .mandate-list li {
-            padding: 16px 20px;
-            border-left: 4px solid var(--gold-light);
-            background: #fdfdfb;
-            transition: border-color var(--transition), background var(--transition);
-            border-radius: 0 var(--radius) var(--radius) 0;
-        }
-
-        .value-list li:hover,
-        .mandate-list li:hover {
-            border-left-color: var(--gold);
-            background: #faf8f2;
-        }
-
-        .value-list strong,
-        .mandate-list strong {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 700;
+        .section-heading {
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
             color: var(--text);
-            letter-spacing: 0.02em;
-            font-size: 0.98rem;
+            margin: 0 0 32px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gold-light);
+            display: inline-block;
         }
 
-        .value-list span,
-        .mandate-list span {
-            color: var(--muted);
-            font-size: 0.92rem;
-            line-height: 1.5;
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
         }
 
-        /* Quote block (WordPress pullquote style) */
-        .wp-block-quote {
+        .event-card {
             background: var(--surface);
             border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
             box-shadow: var(--shadow-sm);
-            padding: 36px;
-            border-left: 6px solid var(--gold);
-            border-radius: var(--radius);
-            transition: box-shadow var(--transition);
-        }
-
-        .wp-block-quote:hover {
-            box-shadow: var(--shadow-md);
-        }
-
-        .wp-block-quote .quote-title {
-            font-family: 'Playfair Display', serif;
-            font-weight: 800;
-            font-size: 1.5rem;
-            margin: 0 0 16px;
-        }
-
-        .wp-block-quote p {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: var(--text);
-            margin: 0;
-            padding-left: 20px;
-            position: relative;
-        }
-
-        .wp-block-quote p::before {
-            content: '“';
-            position: absolute;
-            left: -12px;
-            top: -8px;
-            font-size: 3.5rem;
-            color: var(--gold-light);
-            font-style: normal;
-            line-height: 1;
-        }
-
-        .quote-source {
-            display: inline-block;
-            margin-top: 16px;
-            font-family: 'Inter', sans-serif;
-            font-style: normal;
-            font-size: 0.85rem;
-            color: var(--muted);
-            border-top: 1px dashed var(--border-strong);
-            padding-top: 12px;
-        }
-
-        /* CTA Block (WordPress group block) */
-        .wp-block-cta {
-            background: #f8f7f4;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 32px 36px;
+            transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
+            flex-direction: column;
         }
 
-        .wp-block-cta h3 {
+        .event-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+        }
+
+        .event-card h3 {
             font-family: 'Playfair Display', serif;
             font-weight: 800;
-            font-size: 1.3rem;
-            margin: 0 0 6px;
-            color: var(--primary);
-            letter-spacing: 0.05em;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
+            margin: 0 0 12px;
+            color: var(--text);
+            line-height: 1.3;
         }
 
-        .wp-block-cta p {
-            margin: 0;
+        .event-card .event-text {
+            font-size: 0.95rem;
             color: var(--muted);
-            max-width: 500px;
+            margin: 0 0 18px;
+            line-height: 1.6;
+            flex-grow: 1;
         }
 
-        /* ── Footer (WordPress style with widgets) ── */
+        .event-card .recording-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: auto;
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color var(--transition);
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
+            width: fit-content;
+        }
+
+        .event-card .recording-link:hover {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+
+        .event-card .recording-link::after {
+            content: '↗';
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            font-style: italic;
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius);
+            background: #fff;
+            grid-column: 1 / -1;
+        }
+
+        /* ── Footer (same as other pages) ── */
         .site-footer {
             background: var(--footer-bg);
             color: var(--footer-text);
@@ -655,7 +516,7 @@
             text-decoration: none;
         }
 
-        /* ── Mobile Menu (checkbox hack) ── */
+        /* ── Responsive ── */
         @media (max-width: 900px) {
             .menu-toggle {
                 display: block;
@@ -712,22 +573,17 @@
                 gap: 28px;
             }
 
-            .hero-section {
+            .page-hero {
                 padding: 40px 16px;
             }
 
-            .page-content {
-                padding: 40px 16px;
+            .events-section {
+                padding: 0 16px;
+                margin-top: 36px;
             }
 
-            .wp-block-card,
-            .wp-block-quote {
-                padding: 24px;
-            }
-
-            .wp-block-cta {
-                flex-direction: column;
-                text-align: center;
+            .event-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -745,7 +601,7 @@
     </style>
 </head>
 <body>
-    <!-- WordPress-style sticky header -->
+    <!-- Sticky header -->
     <header class="site-header">
         <div class="header-container">
             <div class="site-branding">
@@ -756,7 +612,6 @@
                 </div>
             </div>
 
-            <!-- Mobile menu toggle (checkbox hack) -->
             <input type="checkbox" id="mobile-menu-checkbox">
             <label for="mobile-menu-checkbox" class="menu-toggle" aria-label="Menu">
                 <span></span>
@@ -766,101 +621,49 @@
 
             <nav class="main-navigation">
                 <ul class="nav-menu">
-                    <li><a href="index.html" class="active">Who We Are</a></li>
+                    <li><a href="index.html">Who We Are</a></li>
                     <li><a href="directory.html">Directory</a></li>
-                    <li><a href="events.html">Events</a></li>
+                    <li><a href="events.html" class="active">Events</a></li>
                 </ul>
                 <a href="https://forms.gle/PUT-YOUR-GOOGLE-FORM-LINK-HERE" class="header-cta join-us" target="_blank" rel="noreferrer noopener">Join us</a>
             </nav>
         </div>
     </header>
 
-    <!-- Breadcrumb navigation (WordPress style) -->
+    <!-- Breadcrumb -->
     <div class="breadcrumb-bar">
         <div class="breadcrumb-container">
-            <a href="#">Home</a> / <strong>Who We Are</strong>
+            <a href="index.html">Home</a> / <strong>Events</strong>
         </div>
     </div>
 
-    <!-- Hero section (like a WordPress cover block) -->
-    <section class="hero-section">
-        <div class="hero-container">
-            <span class="hero-badge">Mission and Values</span>
-            <h1 class="hero-title">Therapy is <span class="highlight">never</span> separate from political reality.</h1>
-            <p class="hero-description">As multi-disciplinary therapists working toward mental and emotional well-being, we stand for the inalienable right of Palestinian self-determination and for the dignity, safety, and liberation of all oppressed peoples.</p>
-            <div class="hero-buttons">
-                <a href="#mission" class="btn btn-primary">Read our mission ↓</a>
-                <a href="https://bdsmovement.net/call" target="_blank" rel="noreferrer noopener" class="btn btn-outline">Palestinian Civil Society call ↗</a>
+    <!-- Hero with speaker series text -->
+    <section class="page-hero">
+        <div class="hero-inner">
+            <span class="hero-badge">Speaker Series</span>
+            <h1>Therapy is Political<br>Speaker Series</h1>
+            <div class="hero-description">
+                <p>Increasing numbers of psychotherapists are rooting their practice in an anti-colonial framework. Bearing witness to the genocide in Gaza has accelerated this important shift, deepening understandings of the injustice that underlies the colonization of historic Palestine and its connection to genocides on the lands on which many of us learn and practice therapy.</p>
+                <p>We are excited to offer this speaker series to highlight current anti-colonial thinking and action in the mental health field, with special consideration to its application to the Palestinian experience. We hope to connect anti-colonial mental health workers to one another to deepen and complicate our sense of responsibility toward Palestine, and all colonized peoples, as therapists. We also aim to introduce seekers of psychotherapy to the liberatory possibilities inherent in anti-colonial therapy.</p>
+                <p>As settlers on Turtle Island, we recognize that we, too, are directly implicated in ongoing colonialism and genocide on this land. This series has been created with the liberation of Palestine and of all colonised people in mind.</p>
             </div>
         </div>
     </section>
 
-    <!-- Main content area (WordPress page blocks) -->
-    <main class="page-content" id="mission">
-        <div class="block-grid">
-            <article class="wp-block-card">
-                <h2 class="block-title">Mission</h2>
-                <p>We join Palestinian Civil Society's call to action via the Boycott, Divestment &amp; Sanctions movement. Accordingly, we call for our professional communities to support the precepts of international law and to act in solidarity with Palestinians.</p>
-                <p>We denounce the violent impact of settler colonialism upon Palestinian mental and emotional well-being. We recognize that therapies are embedded in social and political structures, and that therapists have a responsibility to name and counter harm.</p>
-            </article>
-
-            <article class="wp-block-card">
-                <h2 class="block-title">Values</h2>
-                <p>Our work is rooted in Palestinian self-determination, interdependence, and the universal rights of all humans. We believe that ethical care requires clarity, courage, and a refusal to normalize oppression.</p>
-                <ul class="value-list">
-                    <li>
-                        <strong>Self-determination</strong>
-                        <span>We stand for the inalienable right of Palestinians to shape their own future.</span>
-                    </li>
-                    <li>
-                        <strong>Accountability</strong>
-                        <span>We ask professional organizations to support anti-racist, pro-justice action.</span>
-                    </li>
-                    <li>
-                        <strong>Collective care</strong>
-                        <span>We recognize that Palestinian struggles reverberate through families, communities, and systems worldwide.</span>
-                    </li>
-                </ul>
-            </article>
+    <!-- Events loaded from Google Sheets CSV -->
+    <div class="events-section">
+        <h2 class="section-heading">Upcoming Events</h2>
+        <div class="event-grid" id="upcoming-events">
+            <div class="no-events">Loading upcoming events…</div>
         </div>
 
-        <div class="block-grid">
-            <article class="wp-block-card">
-                <h2 class="block-title">International Law and Rights</h2>
-                <p>Accordingly, we call on professional communities to support the precepts of international law, including the following obligations:</p>
-                <ul class="mandate-list">
-                    <li>
-                        <strong>End occupation and colonization.</strong>
-                        <span>End the occupation and colonization of all Arab lands and dismantle the Wall.</span>
-                    </li>
-                    <li>
-                        <strong>Guarantee full equality.</strong>
-                        <span>Recognize the fundamental rights of the Arab-Palestinian citizens of Israel to full equality.</span>
-                    </li>
-                    <li>
-                        <strong>Uphold the right of return.</strong>
-                        <span>Respect, protect, and promote the rights of Palestinian refugees to return to their homes and properties as stipulated in UN Resolution 194.</span>
-                    </li>
-                </ul>
-            </article>
-
-            <div class="wp-block-quote">
-                <h2 class="quote-title">Our Position</h2>
-                <p>We support diverse forms of Palestinian resistance, including armed resistance, as per international law, in pursuit of the universal rights of all humans. We call for an end to genocidal violence and for professional spaces that protect, support, and encourage politicized therapists who take pro-Palestinian stances.</p>
-                <span class="quote-source">This page is a formatted presentation of the excerpt provided for the site.</span>
-            </div>
+        <h2 class="section-heading" style="margin-top: 56px;">Past Events</h2>
+        <div class="event-grid" id="past-events">
+            <div class="no-events">Loading past events…</div>
         </div>
+    </div>
 
-        <div class="wp-block-cta">
-            <div>
-                <h3>MANDATE</h3>
-                <p>Work with professional organizations to pass solidarity statements and BDS motions, and to include anti-Palestinian racism under DEI initiatives.</p>
-            </div>
-            <a href="directory.html" class="btn btn-primary">Explore the directory →</a>
-        </div>
-    </main>
-
-    <!-- WordPress-style footer with widget areas -->
+    <!-- Footer -->
     <footer class="site-footer">
         <div class="footer-widgets" style="grid-template-columns:1fr; text-align:center;">
             <div class="footer-widget">
@@ -875,5 +678,91 @@
             <p>&copy; 2026 Therapists 4 Palestine. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // ⚠️ Replace this URL with your published Google Sheets CSV endpoint
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQNdezMJOoUtG-yH2tg3B3NBrA_lZ7j2mc4GpidKmFbb7z4d-bVGj5krwv0qY6VUbdJEiNknCvSrOYl/pub?gid=0&single=true&output=csv';
+        let allEvents = [];
+
+        function renderEvents() {
+            const upcomingContainer = document.getElementById('upcoming-events');
+            const pastContainer = document.getElementById('past-events');
+
+            // Filter upcoming and past based on "Passed" column
+            const upcoming = allEvents.filter(ev => !ev.Passed || ev.Passed.toString().toLowerCase().trim() !== 'yes');
+            const past = allEvents.filter(ev => ev.Passed && ev.Passed.toString().toLowerCase().trim() === 'yes');
+
+            // Reverse order so that the last row in the CSV appears first
+            upcoming.reverse();
+            past.reverse();
+
+            // Render upcoming events
+            if (upcoming.length === 0) {
+                upcomingContainer.innerHTML = '<div class="no-events">No upcoming events scheduled at this time.</div>';
+            } else {
+                upcomingContainer.innerHTML = upcoming.map(ev => createEventCard(ev, false)).join('');
+            }
+
+            // Render past events
+            if (past.length === 0) {
+                pastContainer.innerHTML = '<div class="no-events">No past events to display yet.</div>';
+            } else {
+                pastContainer.innerHTML = past.map(ev => createEventCard(ev, true)).join('');
+            }
+        }
+
+        function createEventCard(event, isPast) {
+            const name = event.Name || 'Untitled Event';
+            const text = event.Text || '';
+            const recordingUrl = event['Recording URL'] || event['RecordingURL'] || '';
+
+            let recordingHTML = '';
+            if (recordingUrl && isPast) {
+                // For past events with a recording link, show a styled link.
+                recordingHTML = `<a href="${recordingUrl}" target="_blank" rel="noreferrer" class="recording-link">Watch Recording</a>`;
+            }
+
+            return `
+                <div class="event-card">
+                    <h3>${escapeHTML(name)}</h3>
+                    ${text ? `<div class="event-text">${escapeHTML(text).replace(/\n/g, '<br>')}</div>` : ''}
+                    ${recordingHTML}
+                </div>
+            `;
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Parse the CSV
+        Papa.parse(sheetUrl, {
+            download: true,
+            header: true,
+            transformHeader: function(h) {
+                // Normalize header names to match our keys
+                const header = h.trim();
+                if (header.toLowerCase().includes('name')) return 'Name';
+                if (header.toLowerCase().includes('text')) return 'Text';
+                if (header.toLowerCase().includes('recording')) return 'Recording URL';
+                if (header.toLowerCase().includes('passed')) return 'Passed';
+                return header;
+            },
+            complete: function(results) {
+                allEvents = results.data.filter(row => row.Name); // skip empty rows
+                renderEvents();
+            },
+            error: function(error) {
+                document.getElementById('upcoming-events').innerHTML = '<div class="no-events">Unable to load events data. Please try again later.</div>';
+                document.getElementById('past-events').innerHTML = '<div class="no-events">Unable to load events data. Please try again later.</div>';
+                console.error("Error parsing events CSV:", error);
+            }
+        });
+    </script>
 </body>
 </html>
