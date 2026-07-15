@@ -412,6 +412,37 @@
             margin-left: 4px;
         }
 
+        .event-card .signup-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 14px;
+            padding: 10px 16px;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: var(--radius);
+            transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+            width: fit-content;
+        }
+
+        .event-card .signup-link:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 6px 18px rgba(139, 26, 26, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .event-card .signup-link::after {
+            content: '↗';
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+
         .no-events {
             text-align: center;
             padding: 40px 20px;
@@ -626,7 +657,7 @@
                     <li><a href="directory.html">Directory</a></li>
                     <li><a href="events.html" class="active">Events</a></li>
                 </ul>
-                <a href="https://forms.gle/PUT-YOUR-GOOGLE-FORM-LINK-HERE" class="header-cta join-us" target="_blank" rel="noreferrer noopener">Join us</a>
+                <a href="https://docs.google.com/forms/d/1qJlqsFI60H8C-MNPScenQExcESd0_4kP6S6opkc9GLg/viewform?edit_requested=true#settings" class="header-cta join-us" target="_blank" rel="noreferrer noopener">Join us</a>
             </nav>
         </div>
     </header>
@@ -682,7 +713,7 @@
 
     <script>
         // ⚠️ Replace this URL with your published Google Sheets CSV endpoint
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQNdezMJOoUtG-yH2tg3B3NBrA_lZ7j2mc4GpidKmFbb7z4d-bVGj5krwv0qY6VUbdJEiNknCvSrOYl/pub?gid=0&single=true&output=csv';
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6SHW-SiutAEzeHWV4wMZmcUXgC5rRDFa6Xu3SVc9p5390ZtPp61uPX27ySZHHPBsbB5X42agmk9aj/pub?output=csv';
         let allEvents = [];
 
         function renderEvents() {
@@ -716,6 +747,7 @@
             const name = event.Name || 'Untitled Event';
             const text = event.Text || '';
             const recordingUrl = event['Recording URL'] || event['RecordingURL'] || '';
+            const signupUrl = event['register here'] || event['Register Here'] || event['Signup URL'] || '';
 
             let recordingHTML = '';
             if (recordingUrl && isPast) {
@@ -723,10 +755,16 @@
                 recordingHTML = `<a href="${recordingUrl}" target="_blank" rel="noreferrer" class="recording-link">Watch Recording</a>`;
             }
 
+            let signupHTML = '';
+            if (signupUrl && !isPast) {
+                signupHTML = `<a href="${signupUrl}" target="_blank" rel="noreferrer" class="signup-link">Sign Up</a>`;
+            }
+
             return `
                 <div class="event-card">
                     <h3>${escapeHTML(name)}</h3>
                     ${text ? `<div class="event-text">${escapeHTML(text).replace(/\n/g, '<br>')}</div>` : ''}
+                    ${signupHTML}
                     ${recordingHTML}
                 </div>
             `;
@@ -752,6 +790,7 @@
                 if (header.toLowerCase().includes('text')) return 'Text';
                 if (header.toLowerCase().includes('recording')) return 'Recording URL';
                 if (header.toLowerCase().includes('passed')) return 'Passed';
+                if (header.toLowerCase().includes('register here')) return 'register here';
                 return header;
             },
             complete: function(results) {
