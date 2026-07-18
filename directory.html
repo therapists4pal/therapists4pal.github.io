@@ -1276,10 +1276,7 @@
                 return h.trim();
             },
             complete: function(results) {
-                allData = results.data.filter(person => {
-                    const shareConsent = person.Share ? person.Share.toString().toLowerCase().trim() : '';
-                    return shareConsent.includes('yes') && person.Name;
-                });
+                allData = results.data;
                 renderCards(allData);
                 document.getElementById('filter-province').addEventListener('change', applyFilters);
                 document.getElementById('filter-specialization').addEventListener('change', applyFilters);
